@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="クラス別のチーム数と公開シードで、再現・検証できるトーナメント抽選。18クラス・最大30チーム。"><meta name="theme-color" content="#174c3c"><title>CLASS DRAW | トーナメント抽選</title><link rel="stylesheet" href="./style.css"><script type="module" src="./src/app.js"></script></head>
+<body>
+<header><a class="brand" href="./"><span class="brand-icon" aria-hidden="true">↳</span> CLASS DRAW</a><span class="header-note">公開シードで、確かめられる抽選。</span><a id="source-link" href="./README.md">ソース・仕様 ↗</a></header>
+<main>
+<section class="hero"><div><div class="eyebrow">SCHOOL TOURNAMENT / PUBLIC DRAW</div><h1>対戦のはじまりを、<br><span>公平に。</span></h1><p>18クラス・最大30チーム。同じクラスの1回戦対戦を避け、<br class="desktop">日付と日経平均の終値から組み合わせを決定します。</p></div><div class="hero-card"><span class="small-label">DRAW PROTOCOL</span><strong>SHA-256 → ChaCha20</strong><p>同じ条件なら、いつでも同じ結果。<br>設定と結果を保存して、誰でも再検証。</p><span class="pill">ログイン不要・端末内で計算</span></div></section>
+<div class="workspace">
+<div class="setup">
+<section class="panel"><div class="section-heading"><span class="step">01</span><div><h2>参加チームを設定</h2><p>チームIDはクラスごとに自動発行します。</p></div><strong id="total-badge" class="total">0 <small>/ 30</small></strong></div>
+<label class="field">大会名<input id="title" type="text" maxlength="120" value="クラス対抗トーナメント" autocomplete="off"></label>
+<div id="class-grid" class="class-grid"></div>
+<div id="summary" class="summary" aria-live="polite">参加するチーム数を入力してください。</div>
+<details><summary>チームID一覧を確認</summary><p class="muted">抽選前に、IDと実際の参加チームの対応を確定してください。</p><div id="roster" class="roster"></div></details>
+<div class="button-row"><button id="demo" class="secondary" type="button">入力例を入れる</button><button id="clear" class="plain" type="button">すべて0にする</button></div>
+</section>
+<section class="panel"><div class="section-heading"><span class="step">02</span><div><h2>抽選条件を確定</h2><p>終値が公表される前に、設定を保存・周知します。</p></div></div>
+<div class="two-col"><label class="field">事前指定した取引日<input id="date" type="text" inputmode="numeric" placeholder="YYYYMMDD" maxlength="8" autocomplete="off"><span class="hint">8桁の数字。例：20261020</span></label><label class="field">その日の日経平均株価・終値<input id="price" type="text" inputmode="decimal" placeholder="例：50123.45" autocomplete="off"><span class="hint">カンマなし・小数第2位まで</span></label></div>
+<label class="field">終値の出典URL<input id="source" type="url" value="https://indexes.nikkei.co.jp/nkave/" maxlength="500"><span class="hint">実際に照合する出典を事前に指定してください。</span></label>
+<label class="field">休場・公表遅延・訂正時のルール<textarea id="contingency" rows="3" maxlength="1000">指定日が休場の場合は次の取引日を使用する。公表遅延時は公表を待つ。抽選実行前に確認した公式終値を使用し、実行後の訂正による再抽選は行わない。</textarea><span class="hint">日付変更時は、周知済みルールに基づく変更を別途記録・共有してください。</span></label>
+<div id="seed-preview" class="seed-preview">日付と終値を入力するとシードを表示します。</div>
+<div class="button-row"><button id="save-config" class="secondary" type="button">設定JSONを保存</button><label class="file-button secondary">設定を読み込む<input id="load-config" type="file" accept=".json,application/json"></label></div>
+<p id="config-hash" class="hash">設定ハッシュ：未確定</p>
+<label class="check"><input id="confirm" type="checkbox"><span>本番では、参加チーム・ID・取引日・出典・ルールを終値公表前に周知済みです。試用の場合は、本番結果として扱いません。</span></label>
+<div class="draw-actions"><button id="draw" class="primary" type="button">トーナメントを抽選 <span aria-hidden="true">→</span></button><button id="cancel" type="button" class="secondary" hidden>中断</button></div>
+<p id="status" class="status" role="status" aria-live="polite"></p>
+</section>
+</div>
+<aside class="panel result-panel" id="result-section"><div class="section-heading"><span class="step">03</span><div><h2>トーナメント</h2><p id="result-caption">抽選後、ここに組み合わせが表示されます。</p></div></div>
+<div id="empty-state" class="empty-state"><div class="empty-icon" aria-hidden="true">⌘</div><h3>次の対戦が、ここで決まる。</h3><p>チーム数と抽選条件を入力して<br>「トーナメントを抽選」を押してください。</p><div class="empty-tags"><span>1回戦の同クラス対戦なし</span><span>不戦勝は必要最小限</span></div></div>
+<div id="result" hidden><div id="result-meta" class="result-meta"></div><p class="hint">横にスクロールすると決勝まで確認できます。<br>「不戦勝」は空き枠です。2回戦以降は同クラス対戦があり得ます。</p><div class="bracket-scroll" tabindex="0" aria-label="トーナメント表（横スクロール可能）"><div id="bracket" class="bracket"></div></div><div class="button-row no-print"><button id="save-result" type="button" class="primary">結果JSONを保存</button><button id="print" type="button" class="secondary">印刷 / PDF</button></div><details><summary>抽選の検証情報</summary><dl id="audit" class="audit"></dl></details></div>
+<div class="verification no-print"><h3>保存された結果を再検証</h3><p>結果JSONを読み込み、同じ条件で抽選し直して一致を確認します。</p><label class="file-button secondary">結果JSONを選択して検証<input id="verify-file" type="file" accept=".json,application/json"></label><p id="verify-status" role="status" aria-live="polite"></p></div>
+</aside>
+</div>
+<section class="notes panel"><h2>公平な抽選のために</h2><div class="notes-grid"><div><h3>01 / 条件は先に公開</h3><p>未来の取引日を事前指定し、設定JSONとハッシュを参加者に共有してください。このアプリは事前周知や株価の正しさを証明しません。</p></div><div><h3>02 / 配置全体を抽選</h3><p>固定した不戦勝の配置にチームをシャッフルし、同クラス対戦がある配置は丸ごと棄却します。不戦勝の確率はクラス構成で異なる場合があります。</p></div><div><h3>03 / 誰でも再現・検証</h3><p>日付と終値の和をSHA-256で鍵に変換し、ChaCha20で乱数列を生成します。公開後のシードは予測可能であり、秘密の乱数ではありません。</p></div></div><p><a href="./SPEC.md">抽選仕様を読む ↗</a> <span class="muted">・</span> <a href="./README.md">使い方・GitHub Pagesへの公開 ↗</a></p></section>
+<footer><span>CLASS DRAW <span id="version">v1.0.0</span></span><span id="build-info">公開コードと照合できるトーナメント抽選</span></footer>
+</main></body></html>

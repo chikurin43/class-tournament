@@ -1,0 +1,30 @@
+{
+  "config": {
+    "version": "class-tournament/v1",
+    "title": "検証用サンプル（本番結果ではありません）",
+    "counts": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "drawDate": "20261020",
+    "source": "https://indexes.nikkei.co.jp/nkave/",
+    "contingency": "休場時は次の取引日。公表遅延は待つ。抽選後の訂正による再抽選はしない。"
+  },
+  "configHash": "1a35d7c79f2efe00874120e8647a6081b001efd04c6c2d8c44fca8f4bf3230a3"
+}
